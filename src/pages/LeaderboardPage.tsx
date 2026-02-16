@@ -1,27 +1,33 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Trophy, Medal, Crown } from "lucide-react";
+import MascotBubble from "@/components/MascotBubble";
+import { useGame } from "@/contexts/GameContext";
 
-const leaderboardData = [
+const otherPlayers = [
   { rank: 1, name: "Luna ⭐", xp: 2450, avatar: "🧙‍♀️" },
   { rank: 2, name: "Pedro 🚀", xp: 2100, avatar: "🧑‍💻" },
   { rank: 3, name: "Sofia 💎", xp: 1980, avatar: "👩‍🔬" },
   { rank: 4, name: "Miguel 🎯", xp: 1750, avatar: "🦸‍♂️" },
-  { rank: 5, name: "Você ✨", xp: 1340, avatar: "🧝" },
   { rank: 6, name: "Ana 🌟", xp: 1200, avatar: "🧚" },
   { rank: 7, name: "Lucas 🔥", xp: 980, avatar: "🧑‍🚀" },
 ];
 
-const trophies = [
-  { name: "Mestre dos Loops", icon: "🔄", earned: true },
-  { name: "Lógica de Ferro", icon: "🧠", earned: true },
-  { name: "Primeiro Código", icon: "💻", earned: true },
-  { name: "Domador de Bugs", icon: "🐛", earned: false },
-  { name: "Guardião dos Arrays", icon: "📦", earned: false },
-];
-
 const LeaderboardPage = () => {
   const navigate = useNavigate();
+  const { xp, playerName, playerAvatar, completedLessons } = useGame();
+
+  // Insert player into ranking
+  const playerEntry = { rank: 0, name: playerName || "Você ✨", xp, avatar: playerAvatar };
+  const allPlayers = [...otherPlayers, playerEntry].sort((a, b) => b.xp - a.xp).map((p, i) => ({ ...p, rank: i + 1 }));
+
+  const trophies = [
+    { name: "Primeiro Código", icon: "💻", earned: completedLessons.includes(1) },
+    { name: "Mestre dos Loops", icon: "🔄", earned: completedLessons.includes(2) },
+    { name: "Lógica de Ferro", icon: "🧠", earned: completedLessons.includes(3) },
+    { name: "Domador de Bugs", icon: "🐛", earned: completedLessons.includes(5) },
+    { name: "Boss Derrotado", icon: "⚔️", earned: completedLessons.includes(7) },
+  ];
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown className="text-gold fill-gold" size={24} />;
@@ -33,58 +39,53 @@ const LeaderboardPage = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="p-4 max-w-md mx-auto">
-        <h1 className="text-2xl font-black text-center mb-6">🏆 Salão da Fama</h1>
+        <h1 className="text-2xl font-black text-center mb-4">🏆 Salão da Fama</h1>
+
+        <MascotBubble message="Continue ganhando XP para subir no ranking! 💪" mood="happy" className="mb-4" />
 
         {/* Trophies */}
         <div className="mb-6">
-          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">
-            Suas Medalhas
-          </h3>
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Suas Medalhas</h3>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {trophies.map((trophy) => (
               <motion.div
                 key={trophy.name}
                 whileHover={{ scale: 1.1 }}
                 className={`flex flex-col items-center gap-1 min-w-[80px] p-3 rounded-2xl ${
-                  trophy.earned
-                    ? "bg-card shadow-card-playful"
-                    : "bg-muted opacity-50"
+                  trophy.earned ? "bg-card shadow-card-playful" : "bg-muted opacity-50"
                 }`}
               >
                 <span className="text-3xl">{trophy.icon}</span>
-                <span className="text-[10px] font-bold text-center leading-tight">
-                  {trophy.name}
-                </span>
+                <span className="text-[10px] font-bold text-center leading-tight">{trophy.name}</span>
               </motion.div>
             ))}
           </div>
         </div>
 
         {/* Ranking */}
-        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">
-          Liga Semanal
-        </h3>
+        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-3">Liga Semanal</h3>
         <div className="flex flex-col gap-2">
-          {leaderboardData.map((player, index) => (
-            <motion.div
-              key={player.rank}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.08 }}
-              className={`flex items-center gap-3 p-3 rounded-2xl ${
-                player.rank === 5
-                  ? "bg-primary/10 border-2 border-primary"
-                  : "bg-card shadow-card-playful"
-              }`}
-            >
-              {getRankIcon(player.rank)}
-              <span className="text-2xl">{player.avatar}</span>
-              <div className="flex-1">
-                <p className="font-bold text-sm">{player.name}</p>
-                <p className="text-xs text-muted-foreground">{player.xp} XP</p>
-              </div>
-            </motion.div>
-          ))}
+          {allPlayers.map((player, index) => {
+            const isMe = player.name === (playerName || "Você ✨");
+            return (
+              <motion.div
+                key={player.rank}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.08 }}
+                className={`flex items-center gap-3 p-3 rounded-2xl ${
+                  isMe ? "bg-primary/10 border-2 border-primary" : "bg-card shadow-card-playful"
+                }`}
+              >
+                {getRankIcon(player.rank)}
+                <span className="text-2xl">{player.avatar}</span>
+                <div className="flex-1">
+                  <p className="font-bold text-sm">{player.name}</p>
+                  <p className="text-xs text-muted-foreground">{player.xp} XP</p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 

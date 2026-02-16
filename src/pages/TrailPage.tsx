@@ -2,48 +2,44 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Check, Lock, Star } from "lucide-react";
 import XpBar from "@/components/XpBar";
-
-const phases = [
-  { id: 1, name: "Variáveis Mágicas", status: "complete", icon: "🧪" },
-  { id: 2, name: "Loops Encantados", status: "complete", icon: "🔄" },
-  { id: 3, name: "Condições Secretas", status: "current", icon: "🔮" },
-  { id: 4, name: "Funções do Dragão", status: "locked", icon: "🐉" },
-  { id: 5, name: "Arrays do Tesouro", status: "locked", icon: "💎" },
-  { id: 6, name: "Objetos Místicos", status: "locked", icon: "🏰" },
-  { id: 7, name: "Boss Final", status: "locked", icon: "⚔️" },
-];
+import MascotBubble from "@/components/MascotBubble";
+import { useGame } from "@/contexts/GameContext";
+import { lessons } from "@/data/lessons";
 
 const TrailPage = () => {
   const navigate = useNavigate();
+  const { completedLessons, currentPhase, xp, maxXp, level, crystals, lives } = useGame();
+
+  const getMascotMessage = () => {
+    if (completedLessons.length === 0) return "Sua jornada começa aqui! Toque na primeira fase! 🌟";
+    if (completedLessons.length === lessons.length) return "Você completou TUDO! Você é um verdadeiro mestre! 🏆";
+    return `Muito bem! Você já completou ${completedLessons.length} fases! Continue assim! 💪`;
+  };
 
   return (
-    <div className="min-h-screen bg-background pb-8">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md p-4">
-        <XpBar xp={340} maxXp={500} level={5} crystals={120} lives={3} />
+        <XpBar xp={xp % maxXp} maxXp={maxXp} level={level} crystals={crystals} lives={lives} />
       </div>
 
       {/* Trail */}
-      <div className="flex flex-col items-center gap-2 pt-6 px-4 max-w-md mx-auto">
-        <h2 className="text-2xl font-black text-foreground mb-4">🗺️ Mapa da Jornada</h2>
+      <div className="flex flex-col items-center gap-2 pt-4 px-4 max-w-md mx-auto">
+        <h2 className="text-2xl font-black text-foreground mb-2">🗺️ Mapa da Jornada</h2>
 
-        {phases.map((phase, index) => {
-          const isComplete = phase.status === "complete";
-          const isCurrent = phase.status === "current";
-          const isLocked = phase.status === "locked";
+        <MascotBubble message={getMascotMessage()} mood={completedLessons.length === 0 ? "waving" : "happy"} className="mb-4 w-full" />
 
-          // Zigzag offset
+        {lessons.map((lesson, index) => {
+          const isComplete = completedLessons.includes(lesson.id);
+          const isCurrent = lesson.id === currentPhase && !isComplete;
+          const isLocked = lesson.id > currentPhase;
+
           const offset = index % 2 === 0 ? -40 : 40;
 
           return (
-            <div key={phase.id} className="flex flex-col items-center">
-              {/* Connector line */}
+            <div key={lesson.id} className="flex flex-col items-center">
               {index > 0 && (
-                <div
-                  className={`w-1 h-8 rounded-full ${
-                    isComplete || isCurrent ? "bg-primary" : "bg-node-locked"
-                  }`}
-                />
+                <div className={`w-1 h-8 rounded-full ${isComplete || isCurrent ? "bg-primary" : "bg-node-locked"}`} />
               )}
 
               <motion.button
@@ -55,9 +51,7 @@ const TrailPage = () => {
                 `}
                 whileHover={!isLocked ? { scale: 1.1 } : {}}
                 whileTap={!isLocked ? { scale: 0.95 } : {}}
-                onClick={() => {
-                  if (!isLocked) navigate(`/lessons/${phase.id}`);
-                }}
+                onClick={() => { if (!isLocked) navigate(`/lessons/${lesson.id}`); }}
                 disabled={isLocked}
               >
                 {isComplete ? (
@@ -65,27 +59,21 @@ const TrailPage = () => {
                 ) : isLocked ? (
                   <Lock className="text-node-locked" size={22} />
                 ) : (
-                  <span>{phase.icon}</span>
+                  <span>{lesson.icon}</span>
                 )}
 
                 {isCurrent && (
-                  <motion.div
-                    className="absolute -top-2 -right-2"
-                    animate={{ rotate: [0, 15, -15, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
+                  <motion.div className="absolute -top-2 -right-2" animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity }}>
                     <Star className="text-gold fill-gold" size={20} />
                   </motion.div>
                 )}
               </motion.button>
 
               <span
-                className={`mt-1 text-xs font-bold text-center max-w-[100px] ${
-                  isLocked ? "text-muted-foreground" : "text-foreground"
-                }`}
+                className={`mt-1 text-xs font-bold text-center max-w-[100px] ${isLocked ? "text-muted-foreground" : "text-foreground"}`}
                 style={{ marginLeft: offset }}
               >
-                {phase.name}
+                {lesson.name}
               </span>
             </div>
           );
