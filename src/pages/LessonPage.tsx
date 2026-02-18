@@ -11,9 +11,10 @@ import type { Lesson, QuizLesson, FillBlankLesson, TrueFalseLesson, OrderBlocksL
 const LessonPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { lives, loseLife } = useGame();
+  const { lives, loseLife, resetLives } = useGame();
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [showHint, setShowHint] = useState(true);
+  const [noLives, setNoLives] = useState(false);
 
   const lessonId = parseInt(id || "1");
   const lesson = lessons.find((l) => l.id === lessonId);
@@ -34,8 +35,38 @@ const LessonPage = () => {
   const handleWrong = () => {
     setFeedback("wrong");
     loseLife();
-    setTimeout(() => setFeedback(null), 1200);
+    if (lives <= 1) {
+      setTimeout(() => setNoLives(true), 1200);
+    } else {
+      setTimeout(() => setFeedback(null), 1200);
+    }
   };
+
+  // No lives screen
+  if (noLives) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 gap-6">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+          className="text-8xl"
+        >
+          💔
+        </motion.div>
+        <h2 className="text-2xl font-black text-foreground text-center">Suas vidas acabaram!</h2>
+        <MascotBubble message="Não desanime! Todo mestre erra antes de acertar! Tente de novo! 💪" mood="sad" />
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <Button variant="hero" size="lg" className="w-full" onClick={() => { resetLives(); setNoLives(false); setFeedback(null); }}>
+            <RotateCcw size={18} /> Tentar de Novo!
+          </Button>
+          <Button variant="outline" size="lg" className="w-full" onClick={() => navigate("/trail")}>
+            <ArrowLeft size={18} /> Voltar à Jornada
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -47,13 +78,13 @@ const LessonPage = () => {
         <h2 className="font-black text-lg">{lesson.icon} {lesson.name}</h2>
         <div className="flex items-center gap-1">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Heart key={i} size={20} className={i < lives ? "text-heart fill-heart" : "text-muted-foreground"} />
+            <Heart key={i} size={20} className={i < lives ? "text-heart fill-heart" : "text-muted-foreground opacity-30"} />
           ))}
         </div>
       </div>
 
       <div className="flex-1 px-4 py-4 max-w-md mx-auto w-full flex flex-col gap-4">
-        {showHint && (
+        {showHint && lesson.challenge.mascotHint && (
           <MascotBubble
             message={lesson.challenge.mascotHint}
             mood="thinking"
@@ -75,7 +106,7 @@ const LessonPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`fixed inset-0 flex items-center justify-center z-50 ${
+            className={`fixed inset-0 flex items-center justify-center z-50 pointer-events-none ${
               feedback === "correct" ? "bg-primary/20" : "bg-destructive/20"
             }`}
           >
@@ -161,17 +192,23 @@ const QuizChallenge = ({ challenge, onCorrect, onWrong }: { challenge: QuizLesso
 // Fill in the blank
 const FillBlankChallenge = ({ challenge, onCorrect, onWrong }: { challenge: FillBlankLesson; onCorrect: () => void; onWrong: () => void }) => {
   const [selected, setSelected] = useState<string | null>(null);
+  const [isWrong, setIsWrong] = useState(false);
 
   const parts = challenge.sentence.split("___");
 
   const handleSelect = (opt: string) => {
-    if (selected) return;
+    if (selected && !isWrong) return;
+    if (isWrong) return;
     setSelected(opt);
     if (opt === challenge.correctOption) {
       onCorrect();
     } else {
+      setIsWrong(true);
       onWrong();
-      setTimeout(() => setSelected(null), 1300);
+      setTimeout(() => {
+        setSelected(null);
+        setIsWrong(false);
+      }, 1300);
     }
   };
 
@@ -180,7 +217,7 @@ const FillBlankChallenge = ({ challenge, onCorrect, onWrong }: { challenge: Fill
       <div className="bg-card rounded-2xl p-5 shadow-card-playful border border-border">
         <p className="text-base font-bold text-foreground font-mono leading-relaxed">
           {parts[0]}
-          <span className={`inline-block min-w-[80px] px-3 py-1 mx-1 rounded-xl text-center border-2 border-dashed ${
+          <span className={`inline-block min-w-[80px] px-3 py-1 mx-1 rounded-xl text-center border-2 border-dashed transition-all ${
             selected
               ? selected === challenge.correctOption
                 ? "bg-primary/20 border-primary text-primary"

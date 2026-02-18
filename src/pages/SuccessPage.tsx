@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ const SuccessPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { completeLesson, addXp, addCrystals, resetLives, isNewUser, isRegistered } = useGame();
+  const rewarded = useRef(false);
 
   const lessonId = parseInt(id || "1");
   const lesson = lessons.find((l) => l.id === lessonId);
@@ -18,15 +19,16 @@ const SuccessPage = () => {
   const xpReward = lesson?.xpReward || 50;
   const crystalReward = lesson?.crystalReward || 15;
 
-  // Apply rewards on mount
-  const [rewarded, setRewarded] = useState(false);
-  if (!rewarded) {
-    completeLesson(lessonId);
-    addXp(xpReward);
-    addCrystals(crystalReward);
-    resetLives();
-    setRewarded(true);
-  }
+  // Apply rewards once on mount
+  useEffect(() => {
+    if (!rewarded.current) {
+      rewarded.current = true;
+      completeLesson(lessonId);
+      addXp(xpReward);
+      addCrystals(crystalReward);
+      resetLives();
+    }
+  }, []);
 
   const handleContinue = () => {
     // If new user just completed lesson 1, go to register
@@ -70,7 +72,7 @@ const SuccessPage = () => {
           <span className="text-xs text-muted-foreground font-bold">XP</span>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <Diamond className="text-crystal" size={32} />
+          <Diamond className="text-crystal fill-crystal" size={32} />
           <span className="font-black text-xl">+{crystalReward}</span>
           <span className="text-xs text-muted-foreground font-bold">Cristais</span>
         </div>

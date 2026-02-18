@@ -108,5 +108,6 @@ export default {
       },
     },
   },
+  safelist: ["fill-gold", "fill-heart", "fill-crystal", "fill-primary", "fill-destructive"],
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;

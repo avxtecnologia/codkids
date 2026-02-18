@@ -44,8 +44,12 @@ const XpBar = ({ xp, maxXp, level, crystals, lives }: XpBarProps) => {
 
       {/* Lives */}
       <div className="flex items-center gap-1">
-        {Array.from({ length: lives }).map((_, i) => (
-          <Heart key={i} className="text-heart fill-heart" size={16} />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Heart
+            key={i}
+            size={16}
+            className={i < lives ? "text-heart fill-heart" : "text-muted-foreground opacity-30"}
+          />
         ))}
       </div>
     </div>

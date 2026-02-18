@@ -33,8 +33,8 @@ const ProfilePage = () => {
 
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { icon: <Star className="text-gold" size={22} />, value: String(xp), label: "XP Total" },
-            { icon: <Diamond className="text-crystal" size={22} />, value: String(crystals), label: "Cristais" },
+            { icon: <Star className="text-gold fill-gold" size={22} />, value: String(xp), label: "XP Total" },
+            { icon: <Diamond className="text-crystal fill-crystal" size={22} />, value: String(crystals), label: "Cristais" },
             { icon: <Heart className="text-heart fill-heart" size={22} />, value: String(completedLessons.length), label: "Fases" },
           ].map((stat) => (
             <div key={stat.label} className="bg-card rounded-2xl p-4 flex flex-col items-center gap-1 shadow-card-playful">

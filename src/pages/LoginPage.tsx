@@ -10,7 +10,7 @@ import { useGame } from "@/contexts/GameContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useGame();
+  const { login, startNewUserFlow } = useGame();
   const [showLogin, setShowLogin] = useState(false);
   const [loginName, setLoginName] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -20,6 +20,11 @@ const LoginPage = () => {
       login(loginName.trim());
       navigate("/trail");
     }
+  };
+
+  const handleNewUser = () => {
+    startNewUserFlow();
+    navigate("/onboarding");
   };
 
   if (showLogin) {
@@ -117,7 +122,7 @@ const LoginPage = () => {
             Entrar no Reino
           </Button>
 
-          <Button variant="outline" size="lg" className="w-full" onClick={() => navigate("/onboarding")}>
+          <Button variant="outline" size="lg" className="w-full" onClick={handleNewUser}>
             🌟 Sou Novo Aqui
           </Button>
         </motion.div>
