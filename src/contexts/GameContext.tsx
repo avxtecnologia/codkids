@@ -13,6 +13,10 @@ interface GameState {
   playerAge: number;
   isNewUser: boolean;
   isRegistered: boolean;
+  ownedSkins: string[];
+  isPremium: boolean;
+  dailyLivesUsed: number;
+  lastLivesReset: string;
 }
 
 interface GameContextType extends GameState {
@@ -24,8 +28,19 @@ interface GameContextType extends GameState {
   register: (name: string, avatar: string, age: number) => void;
   login: (name: string) => void;
   startNewUserFlow: () => void;
+  buyAvatar: (skinId: string, cost: number) => boolean;
+  equipAvatar: (emoji: string) => void;
+  togglePremium: () => void;
+  resetProgress: () => void;
   maxXp: number;
+  dailyLivesLeft: number;
+  canPlay: boolean;
+  hoursUntilReset: number;
 }
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+const DAILY_LIVES_LIMIT = 5;
 
 const defaultState: GameState = {
   xp: 0,
@@ -40,6 +55,10 @@ const defaultState: GameState = {
   playerAge: 0,
   isNewUser: true,
   isRegistered: false,
+  ownedSkins: ["wizard"],
+  isPremium: false,
+  dailyLivesUsed: 0,
+  lastLivesReset: today(),
 };
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -49,12 +68,36 @@ const XP_PER_LEVEL = 100;
 export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<GameState>(() => {
     const saved = localStorage.getItem("codekids-game");
-    return saved ? JSON.parse(saved) : defaultState;
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Migrate old saves
+      return {
+        ...defaultState,
+        ...parsed,
+        ownedSkins: parsed.ownedSkins || ["wizard"],
+        isPremium: parsed.isPremium || false,
+        dailyLivesUsed: parsed.dailyLivesUsed || 0,
+        lastLivesReset: parsed.lastLivesReset || today(),
+      };
+    }
+    return defaultState;
   });
 
   useEffect(() => {
     localStorage.setItem("codekids-game", JSON.stringify(state));
   }, [state]);
+
+  // Check daily reset
+  useEffect(() => {
+    if (state.lastLivesReset !== today()) {
+      setState((prev) => ({
+        ...prev,
+        dailyLivesUsed: 0,
+        lastLivesReset: today(),
+        lives: prev.maxLives,
+      }));
+    }
+  }, [state.lastLivesReset]);
 
   const addXp = (amount: number) => {
     setState((prev) => {
@@ -69,7 +112,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const loseLife = () => {
-    setState((prev) => ({ ...prev, lives: Math.max(0, prev.lives - 1) }));
+    setState((prev) => ({
+      ...prev,
+      lives: Math.max(0, prev.lives - 1),
+      dailyLivesUsed: prev.dailyLivesUsed + 1,
+    }));
   };
 
   const resetLives = () => {
@@ -102,7 +149,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       playerName: name,
       isNewUser: false,
       isRegistered: true,
-      // Mock: returning user has some progress
       xp: 150,
       level: 2,
       crystals: 45,
@@ -115,11 +161,47 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     setState({ ...defaultState, isNewUser: true });
   };
 
+  const buyAvatar = (skinId: string, cost: number): boolean => {
+    if (state.ownedSkins.includes(skinId)) return false;
+    if (state.crystals < cost) return false;
+    setState((prev) => ({
+      ...prev,
+      crystals: prev.crystals - cost,
+      ownedSkins: [...prev.ownedSkins, skinId],
+    }));
+    return true;
+  };
+
+  const equipAvatar = (emoji: string) => {
+    setState((prev) => ({ ...prev, playerAvatar: emoji }));
+  };
+
+  const togglePremium = () => {
+    setState((prev) => ({ ...prev, isPremium: !prev.isPremium }));
+  };
+
+  const resetProgress = () => {
+    setState({ ...defaultState, isNewUser: false, isRegistered: true, playerName: state.playerName, playerAvatar: state.playerAvatar, playerAge: state.playerAge });
+  };
+
   const maxXp = state.level * XP_PER_LEVEL;
+  const dailyLivesLeft = state.isPremium ? 99 : Math.max(0, DAILY_LIVES_LIMIT - state.dailyLivesUsed);
+  const canPlay = state.isPremium || dailyLivesLeft > 0 || state.lives > 0;
+
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setDate(midnight.getDate() + 1);
+  midnight.setHours(0, 0, 0, 0);
+  const hoursUntilReset = Math.ceil((midnight.getTime() - now.getTime()) / (1000 * 60 * 60));
 
   return (
     <GameContext.Provider
-      value={{ ...state, addXp, addCrystals, loseLife, resetLives, completeLesson, register, login, startNewUserFlow, maxXp }}
+      value={{
+        ...state,
+        addXp, addCrystals, loseLife, resetLives, completeLesson,
+        register, login, startNewUserFlow, buyAvatar, equipAvatar,
+        togglePremium, resetProgress, maxXp, dailyLivesLeft, canPlay, hoursUntilReset,
+      }}
     >
       {children}
     </GameContext.Provider>

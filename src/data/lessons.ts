@@ -207,3 +207,7 @@ export const lessons: Lesson[] = [
     },
   },
 ];
+
+// Import and merge advanced lessons
+import { advancedLessons } from "./lessons-advanced";
+lessons.push(...advancedLessons);
