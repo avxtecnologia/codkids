@@ -2,19 +2,21 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowLeft, Play, RotateCcw, Check } from "lucide-react";
+import { Heart, ArrowLeft, Play, RotateCcw, Check, Crown, Clock } from "lucide-react";
 import MascotBubble from "@/components/MascotBubble";
 import { useGame } from "@/contexts/GameContext";
+import PremiumModal from "@/components/PremiumModal";
 import { lessons } from "@/data/lessons";
 import type { Lesson, QuizLesson, FillBlankLesson, TrueFalseLesson, OrderBlocksLesson, MultiSelectLesson, MatchPairsLesson, MixedQuizLesson } from "@/data/lessons";
 
 const LessonPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { lives, loseLife, resetLives } = useGame();
+  const { lives, loseLife, resetLives, canPlay, dailyLivesLeft, isPremium, hoursUntilReset } = useGame();
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [showHint, setShowHint] = useState(true);
   const [noLives, setNoLives] = useState(false);
+  const [showPremium, setShowPremium] = useState(false);
 
   const lessonId = parseInt(id || "1");
   const lesson = lessons.find((l) => l.id === lessonId);
@@ -44,26 +46,45 @@ const LessonPage = () => {
 
   // No lives screen
   if (noLives) {
+    const outOfDailyLives = !isPremium && dailyLivesLeft <= 0;
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 gap-6">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200 }}
-          className="text-8xl"
-        >
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }} className="text-8xl">
           💔
         </motion.div>
-        <h2 className="text-2xl font-black text-foreground text-center">Suas vidas acabaram!</h2>
-        <MascotBubble message="Não desanime! Todo mestre erra antes de acertar! Tente de novo! 💪" mood="sad" />
-        <div className="flex flex-col gap-3 w-full max-w-xs">
-          <Button variant="hero" size="lg" className="w-full" onClick={() => { resetLives(); setNoLives(false); setFeedback(null); }}>
-            <RotateCcw size={18} /> Tentar de Novo!
-          </Button>
-          <Button variant="outline" size="lg" className="w-full" onClick={() => navigate("/trail")}>
-            <ArrowLeft size={18} /> Voltar à Jornada
-          </Button>
-        </div>
+        <h2 className="text-2xl font-black text-foreground text-center">
+          {outOfDailyLives ? "Vidas diárias esgotadas!" : "Suas vidas acabaram!"}
+        </h2>
+        {outOfDailyLives ? (
+          <>
+            <MascotBubble message={`Você usou todas as vidas de hoje! Volte em ${hoursUntilReset}h ou assine Premium! 🌙`} mood="sad" />
+            <div className="flex items-center gap-2 bg-muted rounded-xl p-3">
+              <Clock size={18} className="text-muted-foreground" />
+              <span className="text-sm font-bold text-muted-foreground">Novas vidas em {hoursUntilReset} horas</span>
+            </div>
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              <Button variant="hero" size="lg" className="w-full" onClick={() => setShowPremium(true)}>
+                <Crown size={18} /> Assinar Premium
+              </Button>
+              <Button variant="outline" size="lg" className="w-full" onClick={() => navigate("/trail")}>
+                <ArrowLeft size={18} /> Voltar à Jornada
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <MascotBubble message="Não desanime! Todo mestre erra antes de acertar! Tente de novo! 💪" mood="sad" />
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              <Button variant="hero" size="lg" className="w-full" onClick={() => { resetLives(); setNoLives(false); setFeedback(null); }}>
+                <RotateCcw size={18} /> Tentar de Novo!
+              </Button>
+              <Button variant="outline" size="lg" className="w-full" onClick={() => navigate("/trail")}>
+                <ArrowLeft size={18} /> Voltar à Jornada
+              </Button>
+            </div>
+          </>
+        )}
+        <PremiumModal open={showPremium} onOpenChange={setShowPremium} />
       </div>
     );
   }
@@ -560,7 +581,7 @@ const MixedQuizChallenge = ({ challenge, onCorrect, onWrong }: { challenge: Mixe
       </p>
 
       <motion.div key={currentQ} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}>
-        <ChallengeRenderer challenge={q} onCorrect={handleSubCorrect} onWrong={onWrong} />
+        <ChallengeRenderer key={`sub-${currentQ}`} challenge={q} onCorrect={handleSubCorrect} onWrong={onWrong} />
       </motion.div>
     </div>
   );
