@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sparkles, Wand2 } from "lucide-react";
-import castleGate from "@/assets/castle-gate.jpg";
+const castleGate = "/uploads/colado-1780358025556.png";
 import MascotBubble from "@/components/MascotBubble";
 import { useGame } from "@/contexts/GameContext";
 
