@@ -123,7 +123,7 @@ const LoginPage = () => {
           </Button>
 
           <Button variant="outline" size="lg" className="w-full" onClick={handleNewUser}>
-            🌟 Sou Novo Aqui
+            🌟 Sou iniciante aqui!
           </Button>
         </motion.div>
 
