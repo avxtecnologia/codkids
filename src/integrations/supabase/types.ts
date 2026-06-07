@@ -184,6 +184,186 @@ export type Database = {
         }
         Relationships: []
       }
+      cdkids_achievements: {
+        Row: {
+          achievement_key: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_key: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_key?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cdkids_lesson_progress: {
+        Row: {
+          attempts: number
+          completed_at: string
+          crystals_earned: number
+          id: string
+          lesson_id: number
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string
+          crystals_earned?: number
+          id?: string
+          lesson_id: number
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string
+          crystals_earned?: number
+          id?: string
+          lesson_id?: number
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
+      cdkids_parent_settings: {
+        Row: {
+          blocked_until: string | null
+          created_at: string
+          daily_time_limit_min: number | null
+          id: string
+          parent_email: string | null
+          updated_at: string
+          user_id: string
+          weekly_report_enabled: boolean
+        }
+        Insert: {
+          blocked_until?: string | null
+          created_at?: string
+          daily_time_limit_min?: number | null
+          id?: string
+          parent_email?: string | null
+          updated_at?: string
+          user_id: string
+          weekly_report_enabled?: boolean
+        }
+        Update: {
+          blocked_until?: string | null
+          created_at?: string
+          daily_time_limit_min?: number | null
+          id?: string
+          parent_email?: string | null
+          updated_at?: string
+          user_id?: string
+          weekly_report_enabled?: boolean
+        }
+        Relationships: []
+      }
+      cdkids_profiles: {
+        Row: {
+          created_at: string
+          crystals: number
+          current_phase: number
+          daily_lives_used: number
+          id: string
+          is_premium: boolean
+          last_lives_reset: string
+          level: number
+          lives: number
+          max_lives: number
+          owned_skins: string[]
+          player_age: number
+          player_avatar: string
+          player_name: string
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          crystals?: number
+          current_phase?: number
+          daily_lives_used?: number
+          id?: string
+          is_premium?: boolean
+          last_lives_reset?: string
+          level?: number
+          lives?: number
+          max_lives?: number
+          owned_skins?: string[]
+          player_age: number
+          player_avatar?: string
+          player_name: string
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          crystals?: number
+          current_phase?: number
+          daily_lives_used?: number
+          id?: string
+          is_premium?: boolean
+          last_lives_reset?: string
+          level?: number
+          lives?: number
+          max_lives?: number
+          owned_skins?: string[]
+          player_age?: number
+          player_avatar?: string
+          player_name?: string
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      cdkids_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan: string
+          price_brl: number | null
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan?: string
+          price_brl?: number | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan?: string
+          price_brl?: number | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cliente_antivirus: {
         Row: {
           antivirus_nome: string | null
@@ -3170,7 +3350,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      cdkids_leaderboard: {
+        Row: {
+          crystals: number | null
+          level: number | null
+          player_avatar: string | null
+          player_name: string | null
+          rank_position: number | null
+          xp: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _migration_export_data: { Args: never; Returns: string }
