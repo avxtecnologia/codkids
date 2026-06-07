@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 import MascotBubble from "@/components/MascotBubble";
 import { useGame } from "@/contexts/GameContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const avatars = ["🧙‍♂️", "🧝", "🦸‍♂️", "👩‍🔬", "🧑‍🚀", "🧚"];
 const ages = [7, 8, 9, 10, 11, 12, 13, 14];
@@ -12,14 +14,39 @@ const ages = [7, 8, 9, 10, 11, 12, 13, 14];
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { register } = useGame();
+  const { signUp } = useAuth();
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [selectedAvatar, setSelectedAvatar] = useState("🧙‍♂️");
   const [selectedAge, setSelectedAge] = useState(8);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleRegister = () => {
-    if (!name.trim()) return;
+  const isValid =
+    name.trim().length > 0 &&
+    email.trim().length > 0 &&
+    password.length >= 6;
+
+  const handleRegister = async () => {
+    if (!isValid) return;
+    setLoading(true);
+    setErrorMsg("");
+    const { error } = await signUp(email.trim(), password);
+    if (error) {
+      setLoading(false);
+      const msg = (error as any).message?.toLowerCase?.() ?? "";
+      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+        setErrorMsg("Este email já tem uma conta! Tenta fazer login. 🧙‍♂️");
+      } else {
+        setErrorMsg("Ops! Não consegui criar sua conta. Tenta de novo! 🐲");
+      }
+      return;
+    }
+    // GameContext will detect new user_id and upsert profile with these values
     register(name.trim(), selectedAvatar, selectedAge);
-    navigate("/trail");
+    setLoading(false);
+    navigate("/onboarding");
   };
 
   return (
@@ -49,6 +76,34 @@ const RegisterPage = () => {
             onChange={(e) => setName(e.target.value)}
             className="rounded-xl text-base font-semibold"
             maxLength={20}
+          />
+        </div>
+
+        {/* Parent Email */}
+        <div>
+          <label className="text-sm font-bold text-muted-foreground mb-2 block">
+            Email dos pais (para relatórios de progresso)
+          </label>
+          <Input
+            type="email"
+            placeholder="pais@exemplo.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="rounded-xl text-base font-semibold"
+          />
+        </div>
+
+        {/* Password */}
+        <div>
+          <label className="text-sm font-bold text-muted-foreground mb-2 block">
+            Crie uma senha secreta
+          </label>
+          <Input
+            type="password"
+            placeholder="Mínimo 6 letrinhas"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="rounded-xl text-base font-semibold"
           />
         </div>
 
@@ -99,14 +154,31 @@ const RegisterPage = () => {
           </div>
         </div>
 
+        {errorMsg && (
+          <motion.p
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-sm font-bold text-destructive text-center bg-destructive/10 rounded-xl p-3"
+          >
+            {errorMsg}
+          </motion.p>
+        )}
+
         <Button
           variant="hero"
           size="xl"
           className="w-full"
           onClick={handleRegister}
-          disabled={!name.trim()}
+          disabled={!isValid || loading}
         >
-          Entrar no Reino! 🏰
+          {loading ? (
+            <>
+              <Loader2 className="!size-5 animate-spin" />
+              Criando...
+            </>
+          ) : (
+            <>Entrar no Reino! 🏰</>
+          )}
         </Button>
       </motion.div>
     </div>

@@ -3,23 +3,35 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Wand2 } from "lucide-react";
+import { Sparkles, Wand2, Loader2 } from "lucide-react";
 const castleGate = "/uploads/mario-castle.png";
 import MascotBubble from "@/components/MascotBubble";
 import { useGame } from "@/contexts/GameContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login, startNewUserFlow } = useGame();
+  const { signIn } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [loginName, setLoginName] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleLogin = () => {
-    if (loginName.trim()) {
-      login(loginName.trim());
-      navigate("/trail");
+  const handleLogin = async () => {
+    if (!loginEmail.trim() || !loginPassword.trim()) return;
+    setLoading(true);
+    setErrorMsg("");
+    const { error } = await signIn(loginEmail.trim(), loginPassword);
+    setLoading(false);
+    if (error) {
+      setErrorMsg("Ops! Email ou senha incorretos. Tenta de novo! 🐲");
+      return;
     }
+    if (loginName.trim()) login(loginName.trim());
+    navigate("/trail");
   };
 
   const handleNewUser = () => {
@@ -39,16 +51,29 @@ const LoginPage = () => {
             Entrar no Reino 🏰
           </h1>
 
-          <MascotBubble message="Bem-vindo de volta, aventureiro! Digite seu nome mágico para entrar!" mood="happy" />
+          <MascotBubble message="Bem-vindo de volta, aventureiro! Digite seu email e senha para entrar!" mood="happy" />
 
           <div>
             <label className="text-sm font-bold text-muted-foreground mb-2 block">
-              Nome Mágico
+              Nome Mágico (opcional)
             </label>
             <Input
               placeholder="Seu nome de aventureiro"
               value={loginName}
               onChange={(e) => setLoginName(e.target.value)}
+              className="rounded-xl text-base font-semibold"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-bold text-muted-foreground mb-2 block">
+              Email
+            </label>
+            <Input
+              type="email"
+              placeholder="email@exemplo.com"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
               className="rounded-xl text-base font-semibold"
             />
           </div>
@@ -66,12 +91,37 @@ const LoginPage = () => {
             />
           </div>
 
-          <Button variant="hero" size="xl" className="w-full" onClick={handleLogin} disabled={!loginName.trim()}>
-            <Wand2 className="!size-5" />
-            Entrar!
+          {errorMsg && (
+            <motion.p
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm font-bold text-destructive text-center bg-destructive/10 rounded-xl p-3"
+            >
+              {errorMsg}
+            </motion.p>
+          )}
+
+          <Button
+            variant="hero"
+            size="xl"
+            className="w-full"
+            onClick={handleLogin}
+            disabled={!loginEmail.trim() || !loginPassword.trim() || loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="!size-5 animate-spin" />
+                Entrando...
+              </>
+            ) : (
+              <>
+                <Wand2 className="!size-5" />
+                Entrar!
+              </>
+            )}
           </Button>
 
-          <Button variant="ghost" className="w-full" onClick={() => setShowLogin(false)}>
+          <Button variant="ghost" className="w-full" onClick={() => setShowLogin(false)} disabled={loading}>
             ← Voltar
           </Button>
         </motion.div>
