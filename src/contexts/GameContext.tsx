@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface GameState {
   xp: number;
@@ -36,11 +38,13 @@ interface GameContextType extends GameState {
   dailyLivesLeft: number;
   canPlay: boolean;
   hoursUntilReset: number;
+  isLoading: boolean;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 const DAILY_LIVES_LIMIT = 5;
+const STORAGE_KEY = "codekids-game";
 
 const defaultState: GameState = {
   xp: 0,
@@ -65,29 +69,130 @@ const GameContext = createContext<GameContextType | null>(null);
 
 const XP_PER_LEVEL = 100;
 
+// Map DB row -> local GameState
+const rowToState = (row: any, prev: GameState): GameState => ({
+  ...prev,
+  xp: row.xp ?? 0,
+  level: row.level ?? 1,
+  crystals: row.crystals ?? 0,
+  lives: row.lives ?? 3,
+  maxLives: row.max_lives ?? 3,
+  currentPhase: row.current_phase ?? 1,
+  playerName: row.player_name ?? "",
+  playerAvatar: row.player_avatar ?? "🧙‍♂️",
+  playerAge: row.player_age ?? 0,
+  ownedSkins: row.owned_skins ?? ["wizard"],
+  isPremium: row.is_premium ?? false,
+  dailyLivesUsed: row.daily_lives_used ?? 0,
+  lastLivesReset: row.last_lives_reset ?? today(),
+  isNewUser: false,
+  isRegistered: true,
+});
+
+const stateToRow = (state: GameState, userId: string) => ({
+  user_id: userId,
+  xp: state.xp,
+  level: state.level,
+  crystals: state.crystals,
+  lives: state.lives,
+  max_lives: state.maxLives,
+  current_phase: state.currentPhase,
+  player_name: state.playerName,
+  player_avatar: state.playerAvatar,
+  player_age: state.playerAge,
+  owned_skins: state.ownedSkins,
+  is_premium: state.isPremium,
+  daily_lives_used: state.dailyLivesUsed,
+  last_lives_reset: state.lastLivesReset,
+});
+
 export const GameProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const hasLoadedRef = useRef(false);
+  const prevCompletedRef = useRef<number[]>([]);
+
   const [state, setState] = useState<GameState>(() => {
-    const saved = localStorage.getItem("codekids-game");
+    const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      const parsed = JSON.parse(saved);
-      // Migrate old saves
-      return {
-        ...defaultState,
-        ...parsed,
-        ownedSkins: parsed.ownedSkins || ["wizard"],
-        isPremium: parsed.isPremium || false,
-        dailyLivesUsed: parsed.dailyLivesUsed || 0,
-        lastLivesReset: parsed.lastLivesReset || today(),
-      };
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          ...defaultState,
+          ...parsed,
+          ownedSkins: parsed.ownedSkins || ["wizard"],
+          isPremium: parsed.isPremium || false,
+          dailyLivesUsed: parsed.dailyLivesUsed || 0,
+          lastLivesReset: parsed.lastLivesReset || today(),
+        };
+      } catch {
+        return defaultState;
+      }
     }
     return defaultState;
   });
 
+  // Cache locally to avoid flicker
   useEffect(() => {
-    localStorage.setItem("codekids-game", JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  // Check daily reset
+  // Load from Supabase when user becomes available
+  useEffect(() => {
+    if (!user) {
+      hasLoadedRef.current = false;
+      return;
+    }
+    let cancelled = false;
+    setIsLoading(true);
+    (async () => {
+      const { data, error } = await (supabase as any)
+        .from("cdkids_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      if (!error && data) {
+        setState((prev) => rowToState(data, prev));
+
+        // Load completed lessons
+        const { data: lessons } = await (supabase as any)
+          .from("cdkids_lesson_progress")
+          .select("lesson_id")
+          .eq("user_id", user.id);
+        if (!cancelled && lessons) {
+          const ids = lessons.map((l: any) => Number(l.lesson_id)).filter((n: number) => !Number.isNaN(n));
+          setState((prev) => ({
+            ...prev,
+            completedLessons: Array.from(new Set([...prev.completedLessons, ...ids])),
+          }));
+          prevCompletedRef.current = ids;
+        }
+      }
+      hasLoadedRef.current = true;
+      setIsLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  // Sync state -> Supabase (debounced)
+  useEffect(() => {
+    if (!user || !hasLoadedRef.current) return;
+    const handle = setTimeout(() => {
+      (supabase as any)
+        .from("cdkids_profiles")
+        .upsert(stateToRow(state, user.id), { onConflict: "user_id" })
+        .then(() => {});
+    }, 400);
+    return () => clearTimeout(handle);
+  }, [state, user?.id]);
+
+  // Daily reset
   useEffect(() => {
     if (state.lastLivesReset !== today()) {
       setState((prev) => ({
@@ -128,6 +233,21 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       if (prev.completedLessons.includes(lessonId)) return prev;
       const completedLessons = [...prev.completedLessons, lessonId];
       const currentPhase = Math.max(prev.currentPhase, lessonId + 1);
+
+      // Persist lesson progress (best-effort)
+      if (user) {
+        (supabase as any)
+          .from("cdkids_lesson_progress")
+          .insert({
+            user_id: user.id,
+            lesson_id: String(lessonId),
+            xp_earned: 0,
+            crystals_earned: 0,
+            attempts: 1,
+          })
+          .then(() => {});
+      }
+
       return { ...prev, completedLessons, currentPhase };
     });
   };
@@ -181,7 +301,14 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetProgress = () => {
-    setState({ ...defaultState, isNewUser: false, isRegistered: true, playerName: state.playerName, playerAvatar: state.playerAvatar, playerAge: state.playerAge });
+    setState({
+      ...defaultState,
+      isNewUser: false,
+      isRegistered: true,
+      playerName: state.playerName,
+      playerAvatar: state.playerAvatar,
+      playerAge: state.playerAge,
+    });
   };
 
   const maxXp = state.level * XP_PER_LEVEL;
@@ -201,6 +328,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         addXp, addCrystals, loseLife, resetLives, completeLesson,
         register, login, startNewUserFlow, buyAvatar, equipAvatar,
         togglePremium, resetProgress, maxXp, dailyLivesLeft, canPlay, hoursUntilReset,
+        isLoading,
       }}
     >
       {children}
