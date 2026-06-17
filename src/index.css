@@ -46,8 +46,8 @@
     --node-locked: 220 10% 75%;
     --node-complete: 152 55% 45%;
     --node-current: 35 95% 55%;
-    --hero-gradient-from: 152 55% 45%;
-    --hero-gradient-to: 210 85% 55%;
+    --hero-gradient-from: 270 80% 45%;
+    --hero-gradient-to: 280 75% 55%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
