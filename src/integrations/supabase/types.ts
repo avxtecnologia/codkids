@@ -2970,6 +2970,7 @@ export type Database = {
           id: string
           min_price: number
           name: string
+          stripe_price_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -2978,6 +2979,7 @@ export type Database = {
           id: string
           min_price: number
           name: string
+          stripe_price_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -2986,6 +2988,7 @@ export type Database = {
           id?: string
           min_price?: number
           name?: string
+          stripe_price_id?: string | null
         }
         Relationships: []
       }
@@ -2998,6 +3001,8 @@ export type Database = {
           customer_name: string
           customer_phone: string
           id: string
+          paid_at: string | null
+          payment_method: string | null
           plan_id: string
           plan_name: string | null
           plan_price: number
@@ -3005,6 +3010,7 @@ export type Database = {
           seller_earning: number
           seller_id: string | null
           status: string
+          stripe_session_id: string | null
           total_amount: number | null
           updated_at: string | null
         }
@@ -3016,6 +3022,8 @@ export type Database = {
           customer_name: string
           customer_phone: string
           id?: string
+          paid_at?: string | null
+          payment_method?: string | null
           plan_id: string
           plan_name?: string | null
           plan_price: number
@@ -3023,6 +3031,7 @@ export type Database = {
           seller_earning: number
           seller_id?: string | null
           status?: string
+          stripe_session_id?: string | null
           total_amount?: number | null
           updated_at?: string | null
         }
@@ -3034,6 +3043,8 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           id?: string
+          paid_at?: string | null
+          payment_method?: string | null
           plan_id?: string
           plan_name?: string | null
           plan_price?: number
@@ -3041,6 +3052,7 @@ export type Database = {
           seller_earning?: number
           seller_id?: string | null
           status?: string
+          stripe_session_id?: string | null
           total_amount?: number | null
           updated_at?: string | null
         }
