@@ -158,7 +158,7 @@ const LoginPage = () => {
         />
 
         <div className="text-center">
-          <motion.h1 className="text-4xl font-black leading-tight text-pink-500" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+          <motion.h1 className="text-4xl font-black leading-tight bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
 CodeKids
           </motion.h1>
           <motion.p className="text-lg font-semibold text-muted-foreground mt-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
