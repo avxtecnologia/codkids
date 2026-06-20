@@ -6,8 +6,9 @@ import MascotBubble from "@/components/MascotBubble";
 import { useGame } from "@/contexts/GameContext";
 import { lessons } from "@/data/lessons";
 
-const module1 = lessons.filter((l) => l.id <= 7);
-const module2 = lessons.filter((l) => l.id >= 8 && l.id <= 14);
+const module1 = lessons.filter((l) => l.id <= 5);
+const module2 = lessons.filter((l) => l.id >= 6 && l.id <= 10);
+const module3 = lessons.filter((l) => l.id >= 11 && l.id <= 14);
 
 const TrailPage = () => {
   const navigate = useNavigate();
@@ -81,23 +82,38 @@ const TrailPage = () => {
 
         {/* Module 1 */}
         <div className="w-full bg-card/50 rounded-2xl p-3 mb-2">
-          <h3 className="text-sm font-black text-primary uppercase tracking-wide text-center mb-2">📘 Módulo 1: Fundamentos</h3>
+          <h3 className="text-sm font-black text-primary uppercase tracking-wide text-center mb-0">🧠 Módulo 1: O que é IA?</h3>
         </div>
 
         {module1.map((lesson, index) => renderLessonNode(lesson, index, index === 0))}
 
-        {/* Module separator */}
+        {/* Module 2 */}
         {module2.length > 0 && (
           <>
             <div className="w-1 h-6 bg-border rounded-full" />
             <div className="w-full bg-card/50 rounded-2xl p-3 my-2">
-              <h3 className="text-sm font-black text-secondary uppercase tracking-wide text-center mb-0">🐲 Módulo 2: Avançado</h3>
-              {currentPhase <= 7 && (
+              <h3 className="text-sm font-black text-secondary uppercase tracking-wide text-center mb-0">💬 Módulo 2: Conversando com a IA</h3>
+              {currentPhase <= 5 && (
                 <p className="text-[10px] text-muted-foreground text-center mt-1 font-bold">Complete o Módulo 1 para desbloquear</p>
               )}
             </div>
 
             {module2.map((lesson, index) => renderLessonNode(lesson, index, index === 0))}
+          </>
+        )}
+
+        {/* Module 3 */}
+        {module3.length > 0 && (
+          <>
+            <div className="w-1 h-6 bg-border rounded-full" />
+            <div className="w-full bg-card/50 rounded-2xl p-3 my-2">
+              <h3 className="text-sm font-black text-gold uppercase tracking-wide text-center mb-0">🚀 Módulo 3: Criando com Vibecode</h3>
+              {currentPhase <= 10 && (
+                <p className="text-[10px] text-muted-foreground text-center mt-1 font-bold">Complete o Módulo 2 para desbloquear</p>
+              )}
+            </div>
+
+            {module3.map((lesson, index) => renderLessonNode(lesson, index, index === 0))}
           </>
         )}
       </div>

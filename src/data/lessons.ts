@@ -63,151 +63,102 @@ export type Lesson = {
   challenge: QuizLesson | FillBlankLesson | TrueFalseLesson | OrderBlocksLesson | MultiSelectLesson | MatchPairsLesson | MixedQuizLesson;
 };
 
+// ============================================================
+// MÓDULO 1: O QUE É IA? (Fases 1-5)
+// ============================================================
 export const lessons: Lesson[] = [
   {
     id: 1,
-    name: "Variáveis Mágicas",
-    icon: "🧪",
+    name: "O que é IA?",
+    icon: "🧠",
     xpReward: 30,
     crystalReward: 10,
     challenge: {
       type: "quiz",
-      question: "Uma variável é como uma caixinha mágica onde guardamos coisas. O que podemos guardar dentro dela?",
+      question: "IA significa Inteligência Artificial. O que é uma IA?",
       options: [
-        { id: "a", label: "🔢 Números, palavras e listas" },
-        { id: "b", label: "🍕 Só pizza" },
-        { id: "c", label: "🎮 Só jogos" },
+        { id: "a", label: "🧠 Um cérebro mágico de computador que aprende!" },
+        { id: "b", label: "🍕 Um tipo novo de pizza" },
+        { id: "c", label: "🚗 Um carro voador" },
       ],
       correctId: "a",
-      mascotHint: "Pense numa caixa de brinquedos… você pode guardar vários tipos de coisas!",
+      mascotHint: "A IA é como um cérebro feito de computador! Ela aprende olhando muitos exemplos.",
     },
   },
   {
     id: 2,
-    name: "Loops Encantados",
-    icon: "🔄",
-    xpReward: 40,
+    name: "Como a IA Aprende",
+    icon: "📚",
+    xpReward: 35,
     crystalReward: 12,
     challenge: {
-      type: "fill-blank",
-      sentence: "Para o robô dançar 5 vezes, usamos: ___ 5 vezes: dançar()",
-      options: ["repita", "pare", "pule"],
-      correctOption: "repita",
-      mascotHint: "Quando queremos fazer algo de novo e de novo, usamos um loop!",
+      type: "true-false",
+      statements: [
+        { text: "A IA aprende vendo muitos exemplos, como uma criança", correct: true },
+        { text: "A IA já nasce sabendo tudo sem precisar estudar", correct: false },
+        { text: "Quanto mais exemplos, melhor a IA aprende", correct: true },
+      ],
+      mascotHint: "Pra ensinar a IA o que é um gato, mostramos MILHARES de fotos de gatos!",
     },
   },
   {
     id: 3,
-    name: "Condições Secretas",
-    icon: "🔮",
-    xpReward: 45,
+    name: "Dados: A Comida da IA",
+    icon: "🍎",
+    xpReward: 40,
     crystalReward: 15,
     challenge: {
-      type: "true-false",
-      statements: [
-        { text: "\"SE está chovendo, ENTÃO leve guarda-chuva\" é uma condição", correct: true },
-        { text: "O computador pode tomar decisões usando SE e SENÃO", correct: true },
-        { text: "Uma condição só pode ser sobre números", correct: false },
+      type: "multi-select",
+      question: "Quais destes são DADOS que podem alimentar uma IA?",
+      options: [
+        { id: "photos", label: "📷 Fotos" },
+        { id: "texts", label: "📝 Textos e palavras" },
+        { id: "rock", label: "🪨 Uma pedra" },
+        { id: "music", label: "🎵 Músicas" },
+        { id: "cloud", label: "☁️ Uma nuvem no céu" },
       ],
-      mascotHint: "Condições são como escolhas: SE algo acontecer, ENTÃO faço isso, SENÃO faço aquilo!",
+      correctIds: ["photos", "texts", "music"],
+      mascotHint: "Dados são informações que o computador pode ler: fotos, textos, sons, números!",
     },
   },
   {
     id: 4,
-    name: "Funções do Dragão",
-    icon: "🐉",
-    xpReward: 50,
-    crystalReward: 18,
+    name: "Achando Padrões",
+    icon: "🔍",
+    xpReward: 45,
+    crystalReward: 16,
     challenge: {
-      type: "order-blocks",
-      instruction: "Coloque os blocos na ordem certa para o dragão soltar fogo!",
-      blocks: [
-        { id: "open", label: "🐉 acordar_dragão()" },
-        { id: "fire", label: "🔥 preparar_fogo()" },
-        { id: "blast", label: "💥 soltar_fogo()" },
+      type: "quiz",
+      question: "A IA é craque em achar PADRÕES. Qual é o padrão aqui? 🔴🔵🔴🔵🔴 ___",
+      options: [
+        { id: "a", label: "🔵 Azul" },
+        { id: "b", label: "🟢 Verde" },
+        { id: "c", label: "🟡 Amarelo" },
       ],
-      correctOrder: ["open", "fire", "blast"],
-      mascotHint: "Primeiro o dragão acorda, depois prepara, e por fim solta o fogo! Passo a passo!",
+      correctId: "a",
+      mascotHint: "Olha a sequência! Vermelho, azul, vermelho, azul... o que vem agora?",
     },
   },
   {
     id: 5,
-    name: "Arrays do Tesouro",
-    icon: "💎",
+    name: "IA no Dia a Dia",
+    icon: "🌍",
     xpReward: 50,
     crystalReward: 20,
     challenge: {
-      type: "multi-select",
-      question: "Uma lista (array) de frutas pode ter quais itens?",
-      options: [
-        { id: "apple", label: "🍎 Maçã" },
-        { id: "car", label: "🚗 Carro" },
-        { id: "banana", label: "🍌 Banana" },
-        { id: "grape", label: "🍇 Uva" },
-        { id: "house", label: "🏠 Casa" },
-      ],
-      correctIds: ["apple", "banana", "grape"],
-      mascotHint: "Uma lista de frutas só tem… frutas! Escolha todas as frutas que você encontrar!",
-    },
-  },
-  {
-    id: 6,
-    name: "Objetos Místicos",
-    icon: "🏰",
-    xpReward: 55,
-    crystalReward: 22,
-    challenge: {
       type: "match-pairs",
-      instruction: "Conecte cada propriedade do personagem ao seu valor!",
+      instruction: "A IA está em todo lugar! Conecte cada uso da IA ao que ela faz.",
       pairs: [
-        { left: "nome", right: "Codie" },
-        { left: "idade", right: "100 anos" },
-        { left: "cor", right: "Verde" },
-        { left: "poder", right: "Fogo" },
+        { left: "🎬 Netflix", right: "Sugere filmes pra você" },
+        { left: "📱 Alexa/Siri", right: "Responde suas perguntas" },
+        { left: "🎮 Jogos", right: "Controla inimigos espertos" },
+        { left: "📸 Câmera", right: "Reconhece rostos nas fotos" },
       ],
-      mascotHint: "Um objeto é como uma ficha do personagem: cada campo tem um valor! Conecte os pares!",
-    },
-  },
-  {
-    id: 7,
-    name: "Boss Final",
-    icon: "⚔️",
-    xpReward: 80,
-    crystalReward: 30,
-    challenge: {
-      type: "mixed-quiz",
-      mascotHint: "Esse é o desafio final! Use tudo que aprendeu!",
-      questions: [
-        {
-          type: "quiz",
-          question: "O que é um loop (laço)?",
-          options: [
-            { id: "a", label: "Repetir algo várias vezes" },
-            { id: "b", label: "Parar o programa" },
-            { id: "c", label: "Apagar uma variável" },
-          ],
-          correctId: "a",
-          mascotHint: "",
-        },
-        {
-          type: "true-false",
-          statements: [
-            { text: "Uma função é um bloco de código que podemos reutilizar", correct: true },
-          ],
-          mascotHint: "",
-        },
-        {
-          type: "fill-blank",
-          sentence: "Para guardar o nome do jogador, criamos uma ___",
-          options: ["variável", "música", "imagem"],
-          correctOption: "variável",
-          mascotHint: "",
-        },
-      ],
+      mascotHint: "A IA já faz parte da sua vida! Conecte cada coisa ao que ela usa de IA!",
     },
   },
 ];
 
-// Import and merge advanced lessons
+// Import and merge advanced modules (2 and 3)
 import { advancedLessons } from "./lessons-advanced";
 lessons.push(...advancedLessons);

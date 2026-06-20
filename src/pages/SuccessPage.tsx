@@ -21,9 +21,10 @@ const SuccessPage = () => {
   const xpReward = lesson?.xpReward || 50;
   const crystalReward = lesson?.crystalReward || 15;
 
-  const isModule1Complete = lessonId === 7;
-  const isModule2Complete = lessonId === 14;
-  const isModuleMilestone = isModule1Complete || isModule2Complete;
+  const isModule1Complete = lessonId === 5;
+  const isModule2Complete = lessonId === 10;
+  const isModule3Complete = lessonId === 14;
+  const isModuleMilestone = isModule1Complete || isModule2Complete || isModule3Complete;
 
   useEffect(() => {
     if (!rewarded.current) {
@@ -59,31 +60,35 @@ const SuccessPage = () => {
         ))}
 
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 12 }} className="text-9xl mb-4">
-          {isModule2Complete ? "🐲" : "🏆"}
+          {isModule3Complete ? "🚀" : isModule2Complete ? "💬" : "🧠"}
         </motion.div>
 
         <motion.h1
           className="text-3xl font-black text-gradient-hero text-center"
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
         >
-          {isModule2Complete ? "Mestre do Código!" : "Módulo 1 Completo!"}
+          {isModule3Complete ? "Mestre da IA!" : isModule2Complete ? "Módulo 2 Completo!" : "Módulo 1 Completo!"}
         </motion.h1>
 
         <motion.p
           className="text-muted-foreground font-bold text-center mt-2 max-w-xs"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
         >
-          {isModule2Complete
-            ? "Você conquistou todos os desafios! Você é um verdadeiro mestre da programação!"
-            : "Parabéns! Você dominou os fundamentos! Novas fases avançadas foram desbloqueadas!"
+          {isModule3Complete
+            ? "Você criou seu primeiro app com IA! Você é oficialmente um Mestre do Vibecode!"
+            : isModule2Complete
+            ? "Você já sabe conversar com a IA! Agora é hora de CRIAR apps de verdade!"
+            : "Parabéns! Você entendeu o que é IA! Agora vamos aprender a conversar com ela!"
           }
         </motion.p>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="mt-4">
           <MascotBubble
-            message={isModule2Complete
-              ? "Incrível! Você completou TUDO! Novos módulos chegarão em breve! 🌟"
-              : "Uau! Você está pronto para desafios mais avançados! Strings, APIs, Debug... 🚀"
+            message={isModule3Complete
+              ? "INCRÍVEL! Você completou tudo! Continue criando coisas mágicas! 🌟"
+              : isModule2Complete
+              ? "Uau! Você é craque em prompts! Bora criar apps de verdade! 🚀"
+              : "Muito bem! Agora vem a parte mais legal: falar com a IA! 💬"
             }
             mood="celebrating"
           />
@@ -104,9 +109,9 @@ const SuccessPage = () => {
 
         <motion.div className="w-full max-w-xs mt-8 flex flex-col gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
           <Button variant="hero" size="xl" className="w-full" onClick={handleContinue}>
-            {isModule2Complete ? "Voltar à Jornada 🏰" : "Explorar Módulo 2 🚀"}
+            {isModule3Complete ? "Voltar à Jornada 🏰" : isModule2Complete ? "Criar meu App! 🚀" : "Explorar Módulo 2 💬"}
           </Button>
-          {isModule2Complete && (
+          {isModule3Complete && (
             <Button variant="gold" size="lg" className="w-full" onClick={() => setShowPremium(true)}>
               <Crown size={18} /> Assinar Premium
             </Button>
