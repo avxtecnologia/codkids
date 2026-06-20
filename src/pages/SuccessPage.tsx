@@ -109,9 +109,9 @@ const SuccessPage = () => {
 
         <motion.div className="w-full max-w-xs mt-8 flex flex-col gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
           <Button variant="hero" size="xl" className="w-full" onClick={handleContinue}>
-            {isModule2Complete ? "Voltar à Jornada 🏰" : "Explorar Módulo 2 🚀"}
+            {isModule3Complete ? "Voltar à Jornada 🏰" : isModule2Complete ? "Criar meu App! 🚀" : "Explorar Módulo 2 💬"}
           </Button>
-          {isModule2Complete && (
+          {isModule3Complete && (
             <Button variant="gold" size="lg" className="w-full" onClick={() => setShowPremium(true)}>
               <Crown size={18} /> Assinar Premium
             </Button>
