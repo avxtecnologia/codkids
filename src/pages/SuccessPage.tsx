@@ -21,9 +21,10 @@ const SuccessPage = () => {
   const xpReward = lesson?.xpReward || 50;
   const crystalReward = lesson?.crystalReward || 15;
 
-  const isModule1Complete = lessonId === 7;
-  const isModule2Complete = lessonId === 14;
-  const isModuleMilestone = isModule1Complete || isModule2Complete;
+  const isModule1Complete = lessonId === 5;
+  const isModule2Complete = lessonId === 10;
+  const isModule3Complete = lessonId === 14;
+  const isModuleMilestone = isModule1Complete || isModule2Complete || isModule3Complete;
 
   useEffect(() => {
     if (!rewarded.current) {
