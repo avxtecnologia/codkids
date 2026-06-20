@@ -6,8 +6,9 @@ import MascotBubble from "@/components/MascotBubble";
 import { useGame } from "@/contexts/GameContext";
 import { lessons } from "@/data/lessons";
 
-const module1 = lessons.filter((l) => l.id <= 7);
-const module2 = lessons.filter((l) => l.id >= 8 && l.id <= 14);
+const module1 = lessons.filter((l) => l.id <= 5);
+const module2 = lessons.filter((l) => l.id >= 6 && l.id <= 10);
+const module3 = lessons.filter((l) => l.id >= 11 && l.id <= 14);
 
 const TrailPage = () => {
   const navigate = useNavigate();
